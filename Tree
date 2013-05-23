@@ -1,0 +1,153 @@
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class Tree implements Runnable {
+   private ArrayList<Branch> list;
+    privateLock lock;
+    private Condition condition;
+
+    public Tree(){
+        lock = new ReentrantLock();
+        condition = lock.newCondition();
+        list = new ArrayList<Branch>();
+    }
+
+    public boolean aCheck(){
+        for(int i =0; i< list.size(); i++){
+            if(!list.get(i).activate()){
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+
+    public  void addTask(final Branch node){
+        try {
+            if(list!=null && list.isEmpty())
+                list.add(node);
+        }
+        catch (ArrayIndexOutOfBoundsException e){
+            System.out.println("Out of Bounds Exception");
+        }
+        catch (NoSuchElementException e) {
+            System.out.println("Input Mismatch");
+        }
+
+    }
+    public void addTasks(final Branch [] nodes){
+
+        try {
+            if(list!=null && list.isEmpty()){
+                for(Branch e: nodes){
+                    list.add(e);
+                }
+            }
+
+        }
+
+        catch (ArrayIndexOutOfBoundsException e){
+            System.out.println("Out of Bounds Exception");
+        }
+        catch (NoSuchElementException e) {
+            System.out.println("Input Mismatch");
+        }
+
+
+    }
+    public boolean checkState(){
+
+
+        if(list.isEmpty()){
+            return true;
+        }
+        else{
+            return false;
+
+        }
+    }
+
+
+    public Branch removeTask(final Branch node){
+        Branch removedNode = node;
+        try{
+            if(!list.isEmpty() && list!=null){
+                list.remove(node);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            return removedNode;
+        }
+
+
+    }
+    public void executeTasks(){
+
+        lock.lock();
+        try{
+            for(int i =0; i< list.size(); i++){
+                while(list.get(i).activate()){
+                    list.get(i).execute();
+                }
+            }
+        }
+        catch (ArrayIndexOutOfBoundsException e){
+            System.out.println("Our of Bounds Exception");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        finally {
+            lock.unlock();
+        }
+    }
+
+    public void runConcurrentTasks(){
+
+    }
+
+    public String toString (){
+        String string = "" ;
+        try{
+            if(list.isEmpty()){
+                string+= "Empty array" ;
+            }
+            else{
+                for(int i =0; i< list.size(); i++){
+                    string += list.get(i).getClass().toString()+ "/n";
+                }
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+        return string;
+    }
+
+    public void run()
+    {
+
+        try
+        {
+            while (checkState() && aCheck() )
+
+                executeTasks();
+            Thread.sleep(100);
+
+
+        }
+        catch (InterruptedException exception) {
+            System.out.println("Thread interrupted");
+        }
+    }
+}
