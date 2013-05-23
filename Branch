@@ -1,0 +1,8 @@
+public interface Branch {
+
+
+    public boolean activate();
+
+    public void execute();
+
+}
